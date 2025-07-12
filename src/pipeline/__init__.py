@@ -1,0 +1,1 @@
+"""Pipeline module for unified qualitative coding workflow."""
