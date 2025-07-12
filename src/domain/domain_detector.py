@@ -36,7 +36,7 @@ class DomainDetector:
                                 "RAND", "research method", "qualitative analysis"],
                     "patterns": [r"AI\s+adoption", r"machine\s+learning", r"automat\w+", r"research\s+method"],
                     "weight": 1.0,
-                    "codebook": "ai_research_codes.json"
+                    "codebook": "config/codebooks/ai_research_codes.json"
                 },
                 "product_feedback": {
                     "keywords": ["interface", "feature", "user experience", "UX", "UI", "bug", 
@@ -44,28 +44,28 @@ class DomainDetector:
                                 "notification", "mobile", "desktop", "performance"],
                     "patterns": [r"user\s+experience", r"UI/UX", r"bug\s+report", r"feature\s+request"],
                     "weight": 1.0,
-                    "codebook": "product_feedback_codes.json"
+                    "codebook": "config/codebooks/product_feedback_codes.json"
                 },
                 "medical": {
                     "keywords": ["patient", "treatment", "diagnosis", "symptom", "medication",
                                 "clinical", "therapy", "healthcare", "doctor", "nurse", "hospital"],
                     "patterns": [r"patient\s+care", r"clinical\s+trial", r"medical\s+record"],
                     "weight": 1.0,
-                    "codebook": "medical_codes.json"
+                    "codebook": "config/codebooks/medical_codes.json"
                 },
                 "education": {
                     "keywords": ["student", "teacher", "learning", "curriculum", "assessment",
                                 "classroom", "education", "pedagogy", "course", "lesson"],
                     "patterns": [r"student\s+learning", r"educational\s+outcome", r"teaching\s+method"],
                     "weight": 1.0,
-                    "codebook": "education_codes.json"
+                    "codebook": "config/codebooks/education_codes.json"
                 },
                 "customer_service": {
                     "keywords": ["customer", "service", "support", "complaint", "satisfaction",
                                 "resolution", "ticket", "agent", "response time", "issue"],
                     "patterns": [r"customer\s+service", r"support\s+ticket", r"customer\s+satisfaction"],
                     "weight": 1.0,
-                    "codebook": "customer_service_codes.json"
+                    "codebook": "config/codebooks/customer_service_codes.json"
                 }
             }
     

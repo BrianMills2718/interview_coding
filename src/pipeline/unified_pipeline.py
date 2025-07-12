@@ -219,38 +219,12 @@ class UnifiedPipeline:
     def _apply_hybrid_coding(self, transcript: List[Dict], domain_info: Dict):
         """Apply hybrid coding based on domain confidence"""
         
-        # Create simple deductive and inductive coders
-        # In real implementation, these would be the actual methodology implementations
+        # Import the improved coders
+        from src.coding.improved_deductive_coder import ImprovedDeductiveCoder
+        from src.coding.improved_inductive_coder import ImprovedInductiveCoder
         
-        class SimpleDeductiveCoder:
-            def code_transcript(self, transcript, codebook_path, llm_client):
-                if not codebook_path or not Path(codebook_path).exists():
-                    return []
-                
-                # Load codebook
-                with open(codebook_path, 'r') as f:
-                    codebook = json.load(f)
-                
-                # Simple implementation - would use actual methodology
-                results = []
-                # ... coding logic ...
-                return results
-        
-        class SimpleInductiveCoder:
-            def code_transcript(self, transcript, llm_client):
-                # Simple implementation - would use actual methodology
-                results = []
-                # ... emergent coding logic ...
-                return results
-            
-            def code_segments(self, segments, llm_client, existing_codes=None):
-                # Code specific segments
-                results = []
-                # ... coding logic ...
-                return results
-        
-        deductive_coder = SimpleDeductiveCoder()
-        inductive_coder = SimpleInductiveCoder()
+        deductive_coder = ImprovedDeductiveCoder()
+        inductive_coder = ImprovedInductiveCoder()
         
         # Apply hybrid coding
         coding_results = self.hybrid_coder.code_transcript(
