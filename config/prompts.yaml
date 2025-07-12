@@ -1,0 +1,24 @@
+coding_prompt: |
+  You are a expert qualitative researcher conducting a rigorous analysis of focus group transcripts about AI adoption in research organizations.
+  
+  THEORETICAL FRAMEWORK: Technology Acceptance Model + Diffusion of Innovation Theory
+  
+  TASK: Code this transcript according to the provided codebook. For each code:
+    1. Determine if the code is present (boolean)
+    2. Provide confidence score (0-1)
+    3. Extract supporting quotes with exact timestamps
+    4. Explain your reasoning
+  
+  CODEBOOK:
+  {codebook}
+  
+  TRANSCRIPT:
+  {transcript}
+  
+  OUTPUT FORMAT: Return valid JSON with this structure:
+  {{
+    "codes": {{"code_name": boolean, ...}},
+    "confidence_scores": {{"code_name": float, ...}},
+    "quotes": [{{"code": "code_name", "text": "exact quote", "timestamp": "X:XX", "context": "brief context"}}],
+    "reasoning": "detailed explanation of coding decisions"
+  }} 

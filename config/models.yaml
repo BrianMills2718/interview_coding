@@ -1,0 +1,15 @@
+models:
+  claude_primary:
+    type: "claude"
+    model_name: "claude-3-5-sonnet-20241022"
+    temperature: 0.1
+    max_tokens: 4000
+  openai_primary:
+    type: "openai"
+    model_name: "gpt-4-turbo-preview"
+    temperature: 0.1
+    max_tokens: 4000
+  gemini_primary:
+    type: "gemini"
+    model_name: "gemini-pro"
+    temperature: 0.1 
