@@ -149,11 +149,53 @@ class EnhancedFocusGroupAnalyzer:
                 cleaned = cleaned[:-3]
             cleaned = cleaned.strip()
             
-            # Parse JSON
+            # Try to extract JSON object from response
+            # Handle cases where model adds explanation after JSON
+            if cleaned.startswith('{'):
+                # Find the matching closing brace
+                brace_count = 0
+                json_end = -1
+                for i, char in enumerate(cleaned):
+                    if char == '{':
+                        brace_count += 1
+                    elif char == '}':
+                        brace_count -= 1
+                        if brace_count == 0:
+                            json_end = i + 1
+                            break
+                
+                if json_end > 0:
+                    json_str = cleaned[:json_end]
+                    result = json.loads(json_str)
+                    return result
+            
+            # Fallback: try to parse the whole response
             result = json.loads(cleaned)
             return result
         except json.JSONDecodeError as e:
             print(f"Failed to parse {model_name} response: {e}")
+            # Try to extract codes_found from raw response if possible
+            if '"codes_found"' in response:
+                try:
+                    # Extract just the codes_found object
+                    start = response.find('"codes_found"')
+                    if start > 0:
+                        # Find the object boundaries
+                        obj_start = response.find('{', start)
+                        if obj_start > 0:
+                            brace_count = 1
+                            i = obj_start + 1
+                            while i < len(response) and brace_count > 0:
+                                if response[i] == '{':
+                                    brace_count += 1
+                                elif response[i] == '}':
+                                    brace_count -= 1
+                                i += 1
+                            if brace_count == 0:
+                                codes_json = response[obj_start:i]
+                                return {"codes_found": json.loads(codes_json)}
+                except:
+                    pass
             return {"codes_found": {}}
         except Exception as e:
             print(f"Error parsing {model_name} response: {e}")

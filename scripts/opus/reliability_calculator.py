@@ -157,6 +157,14 @@ class ReliabilityCalculator:
             category_df = pd.DataFrame(report['category_summary'])
             if not category_df.empty:
                 category_df.to_excel(writer, sheet_name='Category_Summary', index=False)
+            
+            # Ensure at least one sheet exists
+            if code_df.empty and category_df.empty:
+                placeholder_df = pd.DataFrame({
+                    'Note': ['No coding data available for reliability analysis'],
+                    'Reason': ['All models found no codes or there was no agreement between models']
+                })
+                placeholder_df.to_excel(writer, sheet_name='No_Data', index=False)
         
         print(f"Saved reliability report to {output_path}")
 
