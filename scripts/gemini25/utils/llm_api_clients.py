@@ -119,11 +119,21 @@ def call_gemini_api(prompt: str, model: str = "gemini-1.5-pro", temperature: flo
             )
         )
         
+        # Extract serializable usage data
+        usage_metadata = getattr(response, 'usage_metadata', None)
+        usage_data = None
+        if usage_metadata:
+            usage_data = {
+                "prompt_tokens": getattr(usage_metadata, 'prompt_token_count', 0),
+                "completion_tokens": getattr(usage_metadata, 'candidates_token_count', 0),
+                "total_tokens": getattr(usage_metadata, 'total_token_count', 0)
+            }
+        
         return {
             "success": True,
             "content": response.text,
             "model": model,
-            "usage": getattr(response, 'usage_metadata', None)
+            "usage": usage_data
         }
     except Exception as e:
         return {

@@ -150,6 +150,30 @@ python -m pytest
 - [ ] No API errors or rate limiting issues
 - [ ] Outputs contain actual analysis (not empty)
 
+## Known Issues & Current Status
+
+### Methodology Status (as of July 2025)
+1. **O3**: ❌ Timeout issues with deductive analysis
+2. **Opus**: ✅ Works but has JSON parsing warnings
+3. **Sonnet**: ⚠️ Works but only uses single model (not multi-LLM as intended)
+4. **Gemini**: ⚠️ Works but minimal coverage (only ~10% of segments)
+
+### Critical Issues
+1. **Domain Mismatch**: All methodologies are hardcoded for RAND research/AI adoption analysis
+   - Will produce incorrect results for other content types
+   - Coding schemas need to match your transcript content
+
+2. **Model Configuration**: Some models may be deprecated
+   - Always check current model availability
+   - Update model names in .env as needed
+
+3. **Timeout Risk**: Long transcripts may timeout
+   - Use background execution: `./run_background_analysis.sh`
+   - Monitor progress: `python monitor_analysis.py`
+
+### Optimization in Progress
+See `METHODOLOGY_IMPROVEMENT_NOTES.md` and `OPTIMIZATION_ACTION_PLAN.md` for detailed improvement plans.
+
 ## Troubleshooting
 
 ### Common Issues

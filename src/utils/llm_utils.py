@@ -56,7 +56,9 @@ class LLMClient:
         if api_key:
             try:
                 genai.configure(api_key=api_key)
-                self.gemini_client = genai.GenerativeModel('gemini-pro')
+                # Use model from environment or default to newer version
+                model_name = os.getenv('GEMINI_MODEL', 'gemini-1.5-flash')
+                self.gemini_client = genai.GenerativeModel(model_name)
                 logger.info("Gemini client initialized")
             except Exception as e:
                 logger.error(f"Failed to initialize Gemini client: {e}")

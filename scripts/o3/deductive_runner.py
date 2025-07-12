@@ -16,7 +16,8 @@ from llm_utils import (
     call_claude_sonnet, 
     call_gpt4o, 
     call_gemini,
-    create_deductive_prompt, 
+    create_deductive_prompt,
+    create_batch_deductive_prompt, 
     parse_llm_response, 
     write_jsonl
 )
@@ -32,26 +33,41 @@ OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 thread_local = threading.local()
 
 
-def process_with_model(model_name: str, model_func, df: pd.DataFrame, transcript_id: str) -> list:
-    """Process transcript with a specific model."""
-    print(f"Running {model_name}...")
+def process_with_model(model_name: str, model_func, df: pd.DataFrame, transcript_id: str, batch_size: int = 10) -> list:
+    """Process transcript with a specific model using batch processing."""
+    print(f"Running {model_name} with batch size {batch_size}...")
     results = []
     
-    for idx, row in df.iterrows():
-        uid = row['uid']
-        text = row['text']
+    # Process in batches
+    for i in range(0, len(df), batch_size):
+        batch_df = df.iloc[i:i+batch_size]
+        utterances = [
+            {'uid': row['uid'], 'text': row['text']} 
+            for _, row in batch_df.iterrows()
+        ]
         
-        prompt = create_deductive_prompt(uid, text)
-        response = model_func(prompt, temperature=0.0)
+        # Create batch prompt
+        prompt = create_batch_deductive_prompt(utterances)
         
-        if response:
-            parsed = parse_llm_response(response)
-            results.extend(parsed)
+        # Add timeout protection
+        try:
+            response = model_func(prompt, temperature=0.0)
+            
+            if response:
+                parsed = parse_llm_response(response)
+                results.extend(parsed)
+        except Exception as e:
+            print(f"  {model_name}: Error processing batch {i//batch_size + 1}: {e}")
+            # Continue with next batch instead of failing completely
+            continue
         
-        # Rate limiting
-        if (idx + 1) % 10 == 0:
-            print(f"  {model_name}: Processed {idx + 1}/{len(df)} turns")
-            time.sleep(0.5)  # Reduced sleep for parallel processing
+        # Progress update
+        processed = min(i + batch_size, len(df))
+        print(f"  {model_name}: Processed {processed}/{len(df)} turns")
+        
+        # Rate limiting between batches
+        if i + batch_size < len(df):
+            time.sleep(0.5)
     
     # Write results
     output_file = OUTPUT_DIR / f"{transcript_id}_tags_{model_name.split('-')[0].upper()}.jsonl"

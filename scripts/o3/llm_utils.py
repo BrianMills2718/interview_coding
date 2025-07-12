@@ -323,4 +323,33 @@ def write_jsonl(data: List[Dict[str, Any]], filepath: Path) -> None:
     with open(filepath, 'w', encoding='utf-8') as f:
         for item in data:
             f.write(json.dumps(item) + '\n')
-    print(f"Wrote {len(data)} items to {filepath}") 
+    print(f"Wrote {len(data)} items to {filepath}")
+
+
+def create_batch_deductive_prompt(utterances: List[Dict[str, str]]) -> str:
+    """Create a batch prompt for multiple utterances."""
+    codes_json = json.dumps(DEDUCTIVE_CODES, indent=2)
+    utterances_text = "\n".join([f"UID: {u['uid']}\nText: {u['text']}\n" for u in utterances])
+    
+    return f"""You are an expert qualitative researcher analyzing transcripts.
+
+CODING TASK:
+Analyze these speaker turns and identify ALL applicable codes from the predefined list below.
+
+Available codes:
+{codes_json}
+
+Analyze these speaker turns:
+{utterances_text}
+
+Return a JSON array with one object for each code that applies to each utterance:
+[
+  {{
+    "uid": "utterance_uid",
+    "code": "CODE_NAME",
+    "prob": 1.0
+  }},
+  ...
+]
+
+If no codes apply to any utterance, return an empty array [].""" 
