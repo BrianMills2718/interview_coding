@@ -32,10 +32,27 @@ python scripts/o3/batch_clean.py
 ```
 
 ### 3. Configuration
-Before running analysis, configure API keys in `config/model_config.yaml`:
-- Add your Anthropic API key
-- Add your OpenAI API key  
-- Add your Google API key
+**CRITICAL**: You MUST configure real API keys and models in `.env` file:
+```bash
+# Required API Keys
+ANTHROPIC_API_KEY=your_actual_anthropic_key
+OPENAI_API_KEY=your_actual_openai_key
+GOOGLE_API_KEY=your_actual_google_key
+
+# Required Model Configurations
+O3_CLAUDE_MODEL=claude-3-5-sonnet-20241022
+O3_GPT4_MODEL=gpt-4o
+O3_GEMINI_MODEL=gemini-1.5-pro
+OPUS_CLAUDE_MODEL=claude-3-5-sonnet-20241022
+OPUS_GPT4_MODEL=gpt-4o
+OPUS_GEMINI_MODEL=gemini-1.5-pro
+SONNET_CLAUDE_MODEL=claude-3-5-sonnet-20241022
+SONNET_GPT4_MODEL=gpt-4o
+SONNET_GEMINI_MODEL=gemini-1.5-pro
+GEMINI_MODEL=gemini-1.5-pro
+```
+
+⚠️ **WARNING**: The pipeline will NOT work without valid API keys. Always test with real API calls before declaring success.
 
 Optional: Review `config/prompts.yaml` and `config/sonnet_config.json` (defaults are suitable for first run)
 
@@ -117,10 +134,28 @@ python -m pytest
 - Add new LLM providers by implementing the interface in `src/models/`
 - Customize prompts in `config/prompts.yaml`
 
+## Testing and Validation
+
+### ⚠️ IMPORTANT: Always Test Before Declaring Success
+1. **Never assume the pipeline works without testing**
+2. **Always verify with real API calls**
+3. **Check all outputs are generated correctly**
+4. **Run the test suite**: `python scripts/test_pipeline.py`
+
+### Real Testing Checklist
+- [ ] API keys are valid and working
+- [ ] Model configurations are set in .env
+- [ ] Test transcript processes correctly
+- [ ] All four methodologies produce outputs
+- [ ] No API errors or rate limiting issues
+- [ ] Outputs contain actual analysis (not empty)
+
 ## Troubleshooting
 
 ### Common Issues
 - **Module not found errors**: Reinstall dependencies with `pip install -r requirements.txt`
-- **API errors**: Verify API keys in `config/model_config.yaml` are correct and have necessary permissions
+- **API errors**: Verify API keys in `.env` are correct and have necessary permissions
+- **Model not found**: Ensure model names in .env match available models
 - **File path errors**: Check that file paths in configuration files match your directory structure
 - **Missing outputs**: Ensure raw transcripts are in `data/raw/` before running batch_clean.py
+- **Empty results**: Check API keys are valid and you're not hitting rate limits

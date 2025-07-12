@@ -17,6 +17,10 @@ from datetime import datetime
 import argparse
 from typing import Dict, List, Any
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Configure logging
 logging.basicConfig(
