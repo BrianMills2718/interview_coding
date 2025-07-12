@@ -1,185 +1,206 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides implementation instructions for Claude Code (claude.ai/code) to execute the qualitative analysis pipeline.
 
-## Project Overview
+## Quick Start
 
-This is a qualitative research framework for analyzing Microsoft Teams focus group transcripts using multiple LLM-based methodologies. The project implements four distinct methodologies for comparative analysis: o3 (deductive/inductive), Opus (formal coding), Sonnet (consensus-based), and Gemini (reliability-focused).
-
-## Complete Analysis Pipeline
-
-### 1. Environment Setup
 ```bash
-# Create and activate virtual environment
+# 1. Setup environment
 python3 -m venv venv
-
-# Activation - macOS/Linux:
-source venv/bin/activate
-
-# Activation - Windows:
-.\venv\Scripts\activate
-
-# Install dependencies
+source venv/bin/activate  # On Windows: .\venv\Scripts\activate
 pip install -r requirements.txt
-```
 
-### 2. Data Preparation
-```bash
-# Place raw .docx transcripts in data/raw/
-# Then run cleaning script:
+# 2. Configure API keys in .env
+ANTHROPIC_API_KEY=your_key
+OPENAI_API_KEY=your_key
+GOOGLE_API_KEY=your_key
+
+# 3. Prepare transcripts
+# Place .docx files in data/raw/, then:
 python scripts/o3/batch_clean.py
-# This creates cleaned versions in data/tidy/
-```
 
-### 3. Configuration
-**CRITICAL**: You MUST configure real API keys and models in `.env` file:
-```bash
-# Required API Keys
-ANTHROPIC_API_KEY=your_actual_anthropic_key
-OPENAI_API_KEY=your_actual_openai_key
-GOOGLE_API_KEY=your_actual_google_key
+# 4. Run unified pipeline (RECOMMENDED)
+python test_unified_pipeline.py
 
-# Required Model Configurations
-O3_CLAUDE_MODEL=claude-3-5-sonnet-20241022
-O3_GPT4_MODEL=gpt-4o
-O3_GEMINI_MODEL=gemini-1.5-pro
-OPUS_CLAUDE_MODEL=claude-3-5-sonnet-20241022
-OPUS_GPT4_MODEL=gpt-4o
-OPUS_GEMINI_MODEL=gemini-1.5-pro
-SONNET_CLAUDE_MODEL=claude-3-5-sonnet-20241022
-SONNET_GPT4_MODEL=gpt-4o
-SONNET_GEMINI_MODEL=gemini-1.5-pro
-GEMINI_MODEL=gemini-1.5-pro
-```
-
-⚠️ **WARNING**: The pipeline will NOT work without valid API keys. Always test with real API calls before declaring success.
-
-Optional: Review `config/prompts.yaml` and `config/sonnet_config.json` (defaults are suitable for first run)
-
-### 4. Running the Complete Analysis
-```bash
-# Execute all four methodologies
+# 5. Or run all original methodologies
 python scripts/run_all_methodologies.py
 ```
 
-### 5. Outputs
-Results are organized in the `output/` directory:
-- `output/o3/`: Deductive/inductive coding results, merged outputs, reliability scores
-- `output/opus/`: Structured coding results, reliability analysis, narrative report
-- `output/sonnet/`: Consensus-based coding, cross-transcript comparisons, batch analysis
-- `output/gemini/`: Batch processing outputs, reliability metrics, CSV/JSON results
+## Primary Implementation: Unified Pipeline
 
-Refer to `preliminary_report.md` for synthesis template.
+The unified pipeline integrates domain detection, validation, and adaptive reporting:
 
-## Essential Commands
-
-### Quick Commands
 ```bash
-# Quick start - runs complete setup and all methodologies
-python quick_start.py
+# Single transcript analysis
+python -m src.pipeline.unified_pipeline data/processed/your_transcript.txt
 
-# Run specific methodologies only
-python scripts/run_all_methodologies.py --methods o3 sonnet
+# Batch analysis
+python -m src.pipeline.unified_pipeline --batch data/processed/
 
-# Check environment setup only
-python scripts/run_all_methodologies.py --check-only
-
-# Run individual methodologies
-python scripts/o3/deductive_runner.py --transcript-dir data/processed
-python scripts/opus/enhanced_analyzer.py --transcript-dir data/processed
-python scripts/sonnet/run_sonnet_analysis.py --transcript-dir data/processed
-python scripts/gemini25/main.py --transcript-dir data/processed
+# Force specific domain
+python -m src.pipeline.unified_pipeline --domain product_feedback transcript.txt
 ```
 
-### Testing
+### Key Features
+- **Domain Detection**: Automatically identifies transcript domain (AI research, product feedback, medical, etc.)
+- **Hybrid Coding**: Combines deductive/inductive based on domain confidence
+- **Coverage Metrics**: Reports what percentage was coded and why
+- **Output Validation**: Checks for impossible results
+- **Adaptive Reports**: No hallucinated findings
+
+## Individual Methodologies (Legacy)
+
+### O3 Methodology
 ```bash
-# Run a single test file
-python -m pytest tests/test_specific_file.py
+# Run with improvements
+python scripts/o3/improved_o3_wrapper.py --transcript data/processed/test_transcript.txt
 
-# Run tests for a specific methodology
-python -m pytest tests/test_o3/
-python -m pytest tests/test_sonnet/
-
-# Run all tests
-python -m pytest
+# Or original version
+python scripts/o3/deductive_runner.py
+python scripts/o3/inductive_runner.py
 ```
 
-## Architecture Overview
+### Opus Methodology
+```bash
+cd scripts/opus && python enhanced_analyzer.py
+```
 
-### Core Structure
-- **Multi-Methodology Design**: Four independent methodologies that can run in parallel, each with distinct analysis approaches
-- **Shared Infrastructure**: Common utilities in `/src` for LLM operations, data processing, and reliability calculations
-- **Pipeline Pattern**: Each methodology follows input → processing → analysis → output flow with consistent interfaces
+### Sonnet Methodology
+```bash
+python scripts/sonnet/run_sonnet_analysis.py
+```
 
-### Key Components
-1. **LLM Abstraction Layer** (`src/models/`): Unified interface for Claude, GPT-4, and Gemini models
-2. **Analysis Pipeline** (`src/analysis/`): Manages workflow from transcript processing to final outputs
-3. **Reliability Framework** (`src/utils/reliability.py`): Calculates inter-coder agreement using Krippendorff's alpha
-4. **Output Management**: Generates multiple formats (JSON, CSV, Excel, Markdown) with consistent structure
+### Gemini Methodology
+```bash
+python scripts/gemini25/main.py
+```
 
-### Data Flow
-1. Raw `.docx` transcripts → `scripts/o3/batch_clean.py` → cleaned `.txt` files
-2. Cleaned transcripts → methodology-specific analysis → structured outputs
-3. Individual outputs → aggregation/comparison → final reports
+## Domain-Specific Analysis
 
-### Methodology Differences
-- **o3**: Uses deductive coding (predefined codes) + inductive coding (emergent themes) with union merge
-- **Opus**: Implements formal coding schema with multi-LLM validation
-- **Sonnet**: Achieves consensus through multiple LLM iterations using TAM/DOI frameworks
-- **Gemini**: Optimized for Gemini models with built-in reliability metrics
+### 1. Product Feedback
+```bash
+# Codebook: config/codebooks/product_feedback_codes.json
+python -m src.pipeline.unified_pipeline --domain product_feedback transcript.txt
+```
 
-### Extension Points
-- Add new methodologies by creating a new directory in `/scripts/` following existing patterns
-- Extend codebooks via `config/codebook.yaml`
-- Add new LLM providers by implementing the interface in `src/models/`
-- Customize prompts in `config/prompts.yaml`
+### 2. AI Research
+```bash
+# Codebook: config/codebooks/ai_research_codes.json
+python -m src.pipeline.unified_pipeline --domain ai_research transcript.txt
+```
 
-## Testing and Validation
+### 3. Unknown Domain (Emergent Coding)
+```bash
+# Let system detect and use emergent coding
+python -m src.pipeline.unified_pipeline transcript.txt
+```
 
-### ⚠️ IMPORTANT: Always Test Before Declaring Success
-1. **Never assume the pipeline works without testing**
-2. **Always verify with real API calls**
-3. **Check all outputs are generated correctly**
-4. **Run the test suite**: `python scripts/test_pipeline.py`
+## Adding New Domains
 
-### Real Testing Checklist
-- [ ] API keys are valid and working
-- [ ] Model configurations are set in .env
-- [ ] Test transcript processes correctly
-- [ ] All four methodologies produce outputs
-- [ ] No API errors or rate limiting issues
-- [ ] Outputs contain actual analysis (not empty)
+1. Create codebook in `config/codebooks/your_domain_codes.json`:
+```json
+{
+  "name": "Your Domain Codebook",
+  "domain": "your_domain",
+  "categories": {
+    "CATEGORY_NAME": {
+      "description": "Category description",
+      "codes": {
+        "CODE_NAME": {
+          "label": "Human-readable label",
+          "description": "When to apply this code",
+          "examples": ["example 1", "example 2"]
+        }
+      }
+    }
+  }
+}
+```
 
-## Known Issues & Current Status
+2. Add domain profile to `src/domain/domain_detector.py`:
+```python
+"your_domain": {
+    "keywords": ["domain", "specific", "terms"],
+    "patterns": [r"domain\s+pattern"],
+    "codebook": "your_domain_codes.json"
+}
+```
 
-### Methodology Status (as of July 2025)
-1. **O3**: ❌ Timeout issues with deductive analysis
-2. **Opus**: ✅ Works but has JSON parsing warnings
-3. **Sonnet**: ⚠️ Works but only uses single model (not multi-LLM as intended)
-4. **Gemini**: ⚠️ Works but minimal coverage (only ~10% of segments)
+## Output Structure
 
-### Critical Issues
-1. **Domain Mismatch**: All methodologies are hardcoded for RAND research/AI adoption analysis
-   - Will produce incorrect results for other content types
-   - Coding schemas need to match your transcript content
+```
+outputs/unified/
+├── transcript_name_coding_TIMESTAMP.json    # All coding results
+├── transcript_name_domain_TIMESTAMP.json    # Domain detection info
+├── transcript_name_coverage_TIMESTAMP.json  # Coverage metrics
+├── transcript_name_validation_TIMESTAMP.json # Validation results
+└── transcript_name_report_TIMESTAMP.md      # Human-readable report
+```
 
-2. **Model Configuration**: Some models may be deprecated
-   - Always check current model availability
-   - Update model names in .env as needed
+## Validation Checks
 
-3. **Timeout Risk**: Long transcripts may timeout
-   - Use background execution: `./run_background_analysis.sh`
-   - Monitor progress: `python monitor_analysis.py`
-
-### Optimization in Progress
-See `METHODOLOGY_IMPROVEMENT_NOTES.md` and `OPTIMIZATION_ACTION_PLAN.md` for detailed improvement plans.
+The pipeline automatically validates:
+- ✓ Coverage > 10% (warns if low)
+- ✓ No 100% identical codes
+- ✓ Domain alignment
+- ✓ Statistical validity
+- ✓ Output consistency
 
 ## Troubleshooting
 
-### Common Issues
-- **Module not found errors**: Reinstall dependencies with `pip install -r requirements.txt`
-- **API errors**: Verify API keys in `.env` are correct and have necessary permissions
-- **Model not found**: Ensure model names in .env match available models
-- **File path errors**: Check that file paths in configuration files match your directory structure
-- **Missing outputs**: Ensure raw transcripts are in `data/raw/` before running batch_clean.py
-- **Empty results**: Check API keys are valid and you're not hitting rate limits
+### No codes found
+- Check domain detection: Is the detected domain correct?
+- Try forcing correct domain: `--domain your_domain`
+- Use emergent coding for unknown content
+
+### Low coverage warnings
+- Review uncoded segments in coverage report
+- Consider if codebook matches content
+- May need domain-specific codebook
+
+### Validation failures
+- Check validation report for specific issues
+- Review recommendations provided
+- May indicate fundamental mismatch
+
+## Testing
+
+```bash
+# Test unified pipeline
+python test_unified_pipeline.py
+
+# Test specific components
+python -m pytest tests/test_domain_detector.py
+python -m pytest tests/test_coverage_analyzer.py
+python -m pytest tests/test_output_validator.py
+```
+
+## Background Execution
+
+For long transcripts, run in background:
+```bash
+nohup python -m src.pipeline.unified_pipeline --batch data/processed/ > analysis.log 2>&1 &
+tail -f analysis.log  # Monitor progress
+```
+
+## Key Improvements Over Original
+
+1. **Domain Awareness**: No more forcing AI research analysis on product feedback
+2. **Coverage Visibility**: Know exactly what wasn't coded and why
+3. **No Hallucination**: Reports only what's actually in the transcript
+4. **Validation**: Automatic quality checks
+5. **Flexibility**: Easy to add new domains
+
+## Model Configuration
+
+Current supported models (update in .env as needed):
+- Claude: claude-sonnet-4-20250514
+- OpenAI: o3
+- Gemini: gemini-2.5-pro
+
+## Next Steps
+
+1. Run unified pipeline on your transcripts
+2. Review coverage and validation reports
+3. Add domain-specific codebooks as needed
+4. Iterate based on results
