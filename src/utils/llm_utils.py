@@ -7,9 +7,15 @@ import os
 import json
 import logging
 from typing import Dict, Any, Optional
+from pathlib import Path
+from dotenv import load_dotenv
 import anthropic
 import openai
 import google.generativeai as genai
+
+# Load environment variables
+env_path = Path(__file__).parent.parent.parent / '.env'
+load_dotenv(env_path)
 
 logger = logging.getLogger(__name__)
 
@@ -70,7 +76,7 @@ class LLMClient:
         Query a specific LLM model
         
         Args:
-            model: Model identifier (claude-3-sonnet, gpt-4, gemini-pro)
+            model: Model identifier (claude-3-sonnet, gpt-4, gemini-pro, o3, etc)
             prompt: Input prompt
             **kwargs: Additional parameters
             
@@ -80,7 +86,7 @@ class LLMClient:
         try:
             if model.startswith('claude'):
                 return self._query_claude(model, prompt, **kwargs)
-            elif model.startswith('gpt'):
+            elif model.startswith('gpt') or model == 'o3':
                 return self._query_openai(model, prompt, **kwargs)
             elif model.startswith('gemini'):
                 return self._query_gemini(model, prompt, **kwargs)
@@ -143,7 +149,7 @@ class LLMClient:
     def get_available_models(self) -> Dict[str, bool]:
         """Get list of available models and their status"""
         return {
-            'claude-3-sonnet': self.claude_client is not None,
-            'gpt-4': self.openai_client is not None,
-            'gemini-pro': self.gemini_client is not None
+            'claude-sonnet-4-20250514': self.claude_client is not None,
+            'o3': self.openai_client is not None,
+            'gemini-2.5-pro': self.gemini_client is not None
         } 

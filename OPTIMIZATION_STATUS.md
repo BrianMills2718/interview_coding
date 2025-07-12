@@ -22,13 +22,16 @@ Initial optimizations have been implemented for all four methodologies. Key fixe
 - Need to add Excel error handling with CSV fallback
 - **Status**: Partially fixed, needs JSON parsing improvements
 
-### 3. Sonnet Methodology ⚠️ PARTIALLY WORKING
+### 3. Sonnet Methodology ✅ VERIFIED WORKING (with minor issues)
 **Issue**: Only using single model instead of multi-LLM consensus
-**Fix**: Created proper configuration
+**Fix**: Fixed client initialization
 - Added `config/sonnet_config.json` with all three models
 - Updated model names to current versions
-- **Status**: Config created but Claude/Gemini clients not initializing in utils
-- **Test Result**: Only GPT-4 ran, needs client initialization fix
+- Added dotenv loading to `src/utils/llm_utils.py`
+- Updated model name handling to support 'o3' model
+- **Status**: All three models now running successfully
+- **Test Result**: Claude and O3 work perfectly, Gemini has JSON parsing errors
+- **New Issue**: Gemini-2.5-pro returns invalid JSON that fails to parse
 
 ### 4. Gemini Methodology ✅ VERIFIED WORKING
 **Issue**: UsageMetadata serialization error
@@ -52,20 +55,20 @@ Initial optimizations have been implemented for all four methodologies. Key fixe
 - Custom exception types for different error categories
 
 ## Testing Results
-All optimization tests pass:
-- ✅ O3 batch processing creates valid prompts
-- ✅ Sonnet configuration loads correctly
-- ✅ Gemini serialization works without errors
-- ✅ Progress tracker functions properly
-- ✅ Error handling utilities work as expected
+Real-world test results with API calls:
+- ✅ O3 batch processing works without timeout (processed 19 utterances)
+- ✅ Sonnet multi-model execution works (all 3 models called)
+- ✅ Gemini serialization fixed (all 3 APIs run successfully)
+- ⚠️ Gemini JSON parsing issues in Sonnet (but model is called)
+- ❌ Opus still has JSON parsing errors (not yet fixed)
 
 ## Remaining Issues
 
 ### High Priority
-1. **O3**: Test with real transcript to verify timeout fix
-2. **Opus**: Implement robust JSON parsing
-3. **Gemini**: Investigate why only 10% coverage
-4. **All**: Domain mismatch (hardcoded for RAND/AI research)
+1. **Opus**: Implement robust JSON parsing (still failing)
+2. **Gemini**: Investigate why only 10% coverage
+3. **All**: Domain mismatch (hardcoded for RAND/AI research)
+4. **Sonnet**: Fix Gemini JSON parsing errors
 
 ### Medium Priority
 1. Add configurable prompts for different domains
